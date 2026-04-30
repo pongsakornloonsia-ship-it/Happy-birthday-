@@ -1,96 +1,94 @@
 import streamlit as st
-import time
+from datetime import datetime
 
 st.set_page_config(page_title="For You ❤️", layout="centered")
 
-# ---------- STATE ----------
-if "step" not in st.session_state:
-    st.session_state.step = 0
+# ---------- คำนวณวัน ----------
+start_date = datetime(2024, 2, 14)
+today = datetime.now()
+days = (today - start_date).days
 
 # ---------- CSS ----------
-st.markdown("""
+st.markdown(f"""
 <style>
-body {
-    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-}
-.box {
-    background: white;
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+body {{
+    background: linear-gradient(135deg, #ff758c, #ff7eb3, #fad0c4);
+    color: white;
+}}
+
+.container {{
     text-align: center;
-}
-.big {font-size:28px; font-weight:bold;}
+    padding: 50px 20px;
+}}
+
+.title {{
+    font-size: 45px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}}
+
+.days {{
+    font-size: 80px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0px 0px 20px rgba(255,255,255,0.8);
+}}
+
+.text {{
+    font-size: 22px;
+    max-width: 700px;
+    margin: auto;
+    margin-top: 20px;
+}}
+
+.card {{
+    background: rgba(255,255,255,0.1);
+    padding: 30px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    margin-top: 40px;
+}}
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- PROGRESS ----------
-progress = st.session_state.step / 5
-st.progress(progress)
+# ---------- HERO ----------
+st.markdown(f"""
+<div class="container">
+    <div class="title">เราอยู่ด้วยกันมาแล้ว ❤️</div>
+    <div class="days">{days} วัน</div>
+    <div class="text">ตั้งแต่วันที่ 14 กุมภาพันธ์ 2024</div>
+</div>
+""", unsafe_allow_html=True)
 
-st.markdown("<div class='box'>", unsafe_allow_html=True)
+# ---------- CARD ----------
+st.markdown(f"""
+<div class="card">
+    <div class="text">
+    ตอนนั้นเราอาจไม่ได้คิดอะไรขนาดนี้  
+    แต่ตอนนี้…มันกลายเป็นทุกอย่างไปแล้วจริงๆ
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-# ---------- STEP 0 ----------
-if st.session_state.step == 0:
-    st.markdown("<div class='big'>อยากให้เธอลองเล่นอะไรหน่อย 👀</div>", unsafe_allow_html=True)
-    if st.button("เริ่ม"):
-        st.session_state.step = 1
-        st.rerun()
-
-# ---------- STEP 1 ----------
-elif st.session_state.step == 1:
-    st.markdown("<div class='big'>คิดว่าเราจะพูดอะไร?</div>", unsafe_allow_html=True)
-    st.radio("", ["บอกรัก", "ง้อ", "บ่น", "ไม่รู้"])
-    
-    if st.button("ต่อ"):
-        st.session_state.step = 2
-        st.rerun()
-
-# ---------- STEP 2 ----------
-elif st.session_state.step == 2:
-    placeholder = st.empty()
-    text = "จริงๆแล้ว..."
-    
-    typed = ""
-    for c in text:
-        typed += c
-        placeholder.markdown(f"<div class='big'>{typed}</div>", unsafe_allow_html=True)
-        time.sleep(0.05)
-
-    if st.button("ต่อไป"):
-        st.session_state.step = 3
-        st.rerun()
-
-# ---------- STEP 3 ----------
-elif st.session_state.step == 3:
-    st.markdown("<div class='big'>805 วันที่ผ่านมา...</div>", unsafe_allow_html=True)
-    st.write("มันมีทั้งดีและไม่ดี แต่สุดท้ายเราก็ยังอยู่ตรงนี้")
-
-    if st.button("ต่อ"):
-        st.session_state.step = 4
-        st.rerun()
-
-# ---------- STEP 4 ----------
-elif st.session_state.step == 4:
-    st.markdown("<div class='big'>มีอะไรอยากบอก</div>", unsafe_allow_html=True)
-
-    msg = "เราไม่ได้ดีที่สุด แต่เราจะพยายามเพื่อเธอ"
-    placeholder = st.empty()
-    typed = ""
-
-    for c in msg:
-        typed += c
-        placeholder.markdown(f"<div class='big'>{typed}</div>", unsafe_allow_html=True)
-        time.sleep(0.04)
-
-    if st.button("สุดท้ายแล้ว"):
-        st.session_state.step = 5
-        st.rerun()
+# ---------- MESSAGE ----------
+st.markdown(f"""
+<div class="card">
+    <div class="text">
+    ไม่ว่าจะมีช่วงดี หรือช่วงที่งอนกัน  
+    สุดท้ายเราก็ยังเลือกกันอยู่ดี  
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # ---------- FINAL ----------
-elif st.session_state.step == 5:
+if st.button("กดดูต่อ 💌"):
     st.balloons()
-    st.markdown("<div class='big'>สุขสันต์วันเกิดนะ ❤️</div>", unsafe_allow_html=True)
-    st.success("อยู่กับเรานานๆนะ")
-
-st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="card">
+        <div class="text">
+        สุขสันต์วันเกิดนะ ❤️  
+        ขอบคุณที่อยู่กับเรามาตลอด {days} วัน  
+        และหวังว่าจะมีอีกเยอะๆเลยนะ
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
