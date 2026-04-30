@@ -4,111 +4,63 @@ from datetime import datetime
 
 st.set_page_config(page_title="For You ❤️", layout="centered")
 
-# ---------------- CSS ----------------
+# ---------- CSS ----------
 st.markdown("""
 <style>
-body {
-    background: linear-gradient(to bottom, #ffd6e0, #ffffff);
-}
-.title {
-    text-align:center;
-    font-size:50px;
-    font-weight:bold;
-}
-.subtitle {
-    text-align:center;
-    font-size:20px;
-    margin-bottom:40px;
-}
-.section {
-    margin-top:80px;
-    text-align:center;
-}
-.text {
-    font-size:20px;
-    max-width:700px;
-    margin:auto;
-}
-.big {
-    font-size:28px;
-    font-weight:bold;
-}
+body {background: linear-gradient(#ffd6e0, white);}
+.center {text-align:center;}
+.big {font-size:30px; font-weight:bold;}
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- NAME INPUT ----------------
-name = st.text_input("ใส่ชื่อแฟนของเธอ 💖")
+# ---------- START ----------
+st.markdown("<h1 class='center'>อย่าพึ่งรีบอ่านนะ 👀</h1>", unsafe_allow_html=True)
 
-if name == "":
-    name = "เธอ"
+if st.button("กดเริ่ม"):
+    
+    st.markdown("<h2 class='center'>โอเค งั้นเริ่มจริงๆละ</h2>", unsafe_allow_html=True)
+    time.sleep(1)
 
-# ---------------- HERO ----------------
-st.markdown(f'<div class="title">For {name} ❤️</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">ของขวัญที่เราตั้งใจทำให้</div>', unsafe_allow_html=True)
+    # ---------- STEP 1 ----------
+    choice = st.radio(
+        "คิดว่าเราจะพูดอะไร?",
+        ["บอกรัก", "บ่น", "ง้อ", "ไม่รู้เหมือนกัน"]
+    )
 
-# ---------------- COUNTDOWN ----------------
-target_date = datetime(2026, 6, 26)
-now = datetime.now()
-diff = target_date - now
+    if choice:
+        st.write("ฮ่าๆ เดี๋ยวรู้ 😉")
 
-st.markdown('<div class="section">', unsafe_allow_html=True)
-st.header("นับถอยหลังถึงวันสำคัญ 🎂")
+    # ---------- STEP 2 ----------
+    if st.button("ต่อไป"):
+        st.markdown("<div class='center'>จริงๆแล้ว...</div>", unsafe_allow_html=True)
+        time.sleep(1)
 
-if diff.total_seconds() > 0:
-    st.markdown(f'<div class="big">{diff.days} วัน {diff.seconds//3600} ชั่วโมง</div>', unsafe_allow_html=True)
-else:
-    st.success("วันนี้แหละ ❤️")
+        # ---------- TYPING ----------
+        msg = "เราตั้งใจทำสิ่งนี้ให้เธอจริงๆนะ"
+        placeholder = st.empty()
+        typed = ""
+        for c in msg:
+            typed += c
+            placeholder.markdown(f"<div class='big'>{typed}</div>", unsafe_allow_html=True)
+            time.sleep(0.05)
 
-st.markdown('</div>', unsafe_allow_html=True)
+        # ---------- NEXT ----------
+        if st.button("ยังไม่หมดนะ กดต่อ"):
+            st.write("คิดว่า 805 วันที่ผ่านมาเป็นยังไงบ้าง?")
 
-# ---------------- STORY ----------------
-st.markdown('<div class="section">', unsafe_allow_html=True)
-st.header("มันเริ่มจากวันธรรมดาๆ")
-st.markdown(f'<div class="text">ตอนนั้นเราไม่ได้คิดเลยว่า {name} จะกลายเป็นคนสำคัญขนาดนี้</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+            mood = st.selectbox(
+                "เลือกความรู้สึก",
+                ["ดีมาก", "งงๆ", "มีทั้งดีและไม่ดี", "อยากฆ่าเธอ (ล้อเล่น)"]
+            )
 
-# ---------------- MEMORIES ----------------
-st.markdown('<div class="section">', unsafe_allow_html=True)
-st.header("ระหว่างทางของเรา")
-st.markdown(f'<div class="text">เรามีทั้งช่วงเวลาที่ดี และไม่ดี แต่สุดท้ายเราก็ยังเลือกกัน</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+            if mood:
+                st.write("เราเองก็คิดเหมือนกัน")
 
-# ---------------- REASONS ----------------
-st.markdown('<div class="section">', unsafe_allow_html=True)
-st.header("ทำไมยังเลือกเธอ")
-st.markdown(f"""
-<div class="text">
-- เพราะอยู่กับ {name} แล้วสบายใจ<br>
-- เพราะเราเป็นตัวเองได้<br>
-- เพราะต่อให้ทะเลาะ ก็ยังอยากมี {name}<br>
-</div>
-""", unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+            # ---------- FINAL ----------
+            if st.button("โอเค มาถึงตรงนี้ละ"):
+                st.balloons()
+                st.markdown(f"<h2 class='center'>สุขสันต์วันเกิดนะ ❤️</h2>", unsafe_allow_html=True)
+                st.write("ขอบคุณที่อยู่ด้วยกันมานะ")
 
-# ---------------- TYPING EFFECT ----------------
-st.markdown('<div class="section">', unsafe_allow_html=True)
-st.header("มีอะไรอยากบอก...")
-
-placeholder = st.empty()
-message = f"{name} คือหนึ่งในสิ่งที่ดีที่สุดในชีวิตเรา"
-
-typed = ""
-for char in message:
-    typed += char
-    placeholder.markdown(f"<div class='big'>{typed}</div>", unsafe_allow_html=True)
-    time.sleep(0.05)
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------------- SURPRISE ----------------
-st.markdown('<div class="section">', unsafe_allow_html=True)
-if st.button("กดรับของขวัญ 🎁"):
-    st.balloons()
-    st.success(f"สุขสันต์วันเกิดนะ {name} ❤️ อยู่กับเรานานๆนะ")
-st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------------- EXTRA ----------------
-st.markdown('<div class="section">', unsafe_allow_html=True)
-st.header("805 วัน")
-st.markdown(f'<div class="text">มันไม่ใช่แค่ตัวเลข แต่มันคือทุกช่วงเวลาที่เรามีกัน</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+                if st.button("กดสุดท้าย"):
+                    st.success("อยู่กับเรานานๆนะ เราไม่ได้อยากเสียเธอไปเลยจริงๆ")
