@@ -1,450 +1,611 @@
 import streamlit as st
-from datetime import date, datetime
+from datetime import date
 import random
 
 st.set_page_config(
     page_title="Happy Birthday 🎂",
-    page_icon="🎂",
-    layout="wide"
+    page_icon="🎁",
+    layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
-# ---------- DATE ----------
-birthday_month = 6
-birthday_day = 26
-today = date.today()
-this_year_birthday = date(today.year, birthday_month, birthday_day)
-next_birthday = this_year_birthday if today <= this_year_birthday else date(today.year + 1, birthday_month, birthday_day)
-days_to_birthday = (next_birthday - today).days
-
+# ---------- DATA ----------
 start_date = date(2024, 2, 14)
+today = date.today()
 days_together = (today - start_date).days
 
-# ---------- STATE ----------
-if "gift_open" not in st.session_state:
-    st.session_state.gift_open = False
-if "note_open" not in st.session_state:
-    st.session_state.note_open = False
-if "quote_index" not in st.session_state:
-    st.session_state.quote_index = 0
-if "memory_index" not in st.session_state:
-    st.session_state.memory_index = 0
-if "clicks" not in st.session_state:
-    st.session_state.clicks = 0
+birthday_month = 6
+birthday_day = 26
+birthday_this_year = date(today.year, birthday_month, birthday_day)
+next_birthday = birthday_this_year if today <= birthday_this_year else date(today.year + 1, birthday_month, birthday_day)
+days_to_birthday = (next_birthday - today).days
 
 quotes = [
-    "สุขสันต์วันเกิดนะเธอ 🎂",
-    "ขอให้ปีนี้เป็นปีที่ดีมาก ๆ",
-    "ตั้งใจทำเว็บนี้ให้เป็นของขวัญจริง ๆ",
-    "เธอเป็นคนสำคัญของเราเสมอ",
-    "วันนี้ต้องเป็นวันของเธอเท่านั้น",
+    "สุขสันต์วันเกิดนะเธอ 💖",
+    "วันนี้เป็นวันของเธอ",
+    "ขอให้ปีนี้มีแต่เรื่องดี ๆ",
+    "ของขวัญชิ้นนี้ตั้งใจทำให้เธอ",
+    "เธอคือคนสำคัญของเราเสมอ",
 ]
 
-memories = [
-    "วันที่เริ่มคุยกันแล้วรู้สึกว่าใช่",
-    "วันที่อยากทักหาเธอมากกว่าปกติ",
-    "วันที่ยิ้มเพราะเธอโดยไม่รู้ตัว",
-    "วันที่ธรรมดา แต่จำได้ชัด",
-    "วันที่อยากเก็บไว้เป็นของขวัญทางใจ",
+mini_notes = [
+    "อยู่ด้วยแล้วสบายใจ",
+    "แค่คุยกันก็ดีแล้ว",
+    "วันธรรมดาก็พิเศษได้",
+    "ไม่ต้องเยอะ แต่ต้องจริงใจ",
+    "เธอคือคนพิเศษของวันนี้",
 ]
+
+if "page" not in st.session_state:
+    st.session_state.page = 0
+if "quote_index" not in st.session_state:
+    st.session_state.quote_index = 0
+if "note_index" not in st.session_state:
+    st.session_state.note_index = 0
+if "spark_count" not in st.session_state:
+    st.session_state.spark_count = 0
+if "gift_open" not in st.session_state:
+    st.session_state.gift_open = False
+if "secret_open" not in st.session_state:
+    st.session_state.secret_open = False
+if "mood" not in st.session_state:
+    st.session_state.mood = 68
 
 # ---------- CSS ----------
-st.markdown("""
-<style>
-#MainMenu, footer, header {visibility: hidden;}
+st.markdown(
+    """
+    <style>
+    #MainMenu, footer, header {visibility: hidden;}
 
-.stApp {
-    background:
-        radial-gradient(circle at top left, rgba(255, 148, 180, 0.32), transparent 25%),
-        radial-gradient(circle at top right, rgba(162, 123, 255, 0.24), transparent 22%),
-        radial-gradient(circle at bottom center, rgba(255, 205, 120, 0.18), transparent 28%),
-        linear-gradient(135deg, #f7dce8 0%, #f4eaff 45%, #fff0db 100%);
-}
+    .stApp {
+        background:
+            radial-gradient(circle at 15% 15%, rgba(255, 168, 198, 0.55), transparent 24%),
+            radial-gradient(circle at 85% 20%, rgba(171, 145, 255, 0.38), transparent 22%),
+            radial-gradient(circle at 50% 95%, rgba(255, 214, 142, 0.30), transparent 26%),
+            linear-gradient(135deg, #fde8ef 0%, #f4e8ff 46%, #fff1dd 100%);
+        background-attachment: fixed;
+    }
 
-.block-container {
-    max-width: 1180px;
-    padding-top: 1rem;
-    padding-bottom: 2.5rem;
-}
+    .block-container {
+        max-width: 1200px;
+        padding-top: 1rem;
+        padding-bottom: 2.5rem;
+    }
 
-.hero {
-    background: rgba(255,255,255,0.72);
-    border: 1px solid rgba(120, 80, 130, 0.10);
-    border-radius: 30px;
-    padding: 30px 24px;
-    box-shadow: 0 16px 36px rgba(105, 71, 102, 0.12);
-    text-align: center;
-    margin-bottom: 18px;
-}
+    .floating {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 0;
+    }
 
-.badge {
-    display: inline-block;
-    padding: 7px 14px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.86);
-    color: #8b5c8f;
-    border: 1px solid rgba(120, 80, 130, 0.10);
-    font-weight: 700;
-    margin-bottom: 12px;
-}
+    .heart {
+        position: absolute;
+        bottom: -40px;
+        opacity: 0.22;
+        animation: floatUp linear infinite;
+        user-select: none;
+        filter: blur(0.1px);
+    }
 
-.title {
-    font-size: clamp(2.2rem, 5vw, 4.2rem);
-    font-weight: 900;
-    color: #5a3460;
-    margin: 0;
-}
+    .sparkle {
+        position: absolute;
+        border-radius: 999px;
+        opacity: 0.35;
+        animation: drift linear infinite;
+    }
 
-.subtitle {
-    color: #755a75;
-    line-height: 1.75;
-    margin: 12px auto 0 auto;
-    max-width: 800px;
-    font-size: 1rem;
-}
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(0.9) rotate(0deg); opacity: 0; }
+        10% { opacity: 0.28; }
+        100% { transform: translateY(-115vh) scale(1.2) rotate(18deg); opacity: 0; }
+    }
 
-.stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 18px;
-}
+    @keyframes drift {
+        0% { transform: translateY(0) translateX(0); opacity: 0.15; }
+        50% { transform: translateY(-18px) translateX(20px); opacity: 0.32; }
+        100% { transform: translateY(0) translateX(0); opacity: 0.15; }
+    }
 
-.stat {
-    background: rgba(255,255,255,0.72);
-    border: 1px solid rgba(120, 80, 130, 0.10);
-    border-radius: 22px;
-    padding: 16px 14px;
-    box-shadow: 0 10px 22px rgba(105, 71, 102, 0.08);
-    text-align: center;
-}
+    .hero {
+        position: relative;
+        z-index: 2;
+        padding: 28px 22px;
+        border-radius: 30px;
+        background: rgba(255,255,255,0.68);
+        border: 1px solid rgba(125, 87, 140, 0.10);
+        box-shadow: 0 18px 40px rgba(105, 71, 102, 0.11);
+        backdrop-filter: blur(10px);
+        text-align: center;
+        margin-bottom: 18px;
+    }
 
-.num {
-    font-size: 2rem;
-    font-weight: 900;
-    color: #6a3f73;
-    line-height: 1;
-}
+    .badge {
+        display: inline-block;
+        padding: 7px 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.82);
+        border: 1px solid rgba(125, 87, 140, 0.10);
+        color: #8a5e8f;
+        font-weight: 800;
+        margin-bottom: 12px;
+        font-size: 0.92rem;
+    }
 
-.label {
-    margin-top: 6px;
-    color: #7c687a;
-    font-size: 0.92rem;
-}
+    .title {
+        font-size: clamp(2.3rem, 5vw, 4.3rem);
+        font-weight: 900;
+        margin: 0;
+        color: #5a3460;
+        letter-spacing: -0.03em;
+    }
 
-.section {
-    margin-top: 18px;
-    padding: 18px;
-    border-radius: 26px;
-    background: rgba(255,255,255,0.62);
-    border: 1px solid rgba(120, 80, 130, 0.10);
-    box-shadow: 0 12px 26px rgba(105, 71, 102, 0.08);
-}
+    .subtitle {
+        margin: 12px auto 0 auto;
+        max-width: 820px;
+        color: #6f5a73;
+        line-height: 1.75;
+        font-size: 1rem;
+    }
 
-.section h2 {
-    margin: 0 0 8px 0;
-    color: #5a3460;
-    font-size: 1.35rem;
-}
+    .rowbox {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 18px;
+    }
 
-.section p {
-    margin: 0;
-    color: #725a72;
-    line-height: 1.72;
-}
+    .stat {
+        background: rgba(255,255,255,0.72);
+        border: 1px solid rgba(125, 87, 140, 0.10);
+        border-radius: 22px;
+        padding: 16px 14px;
+        box-shadow: 0 10px 22px rgba(105, 71, 102, 0.08);
+        text-align: center;
+    }
 
-.card {
-    padding: 16px;
-    border-radius: 22px;
-    background: rgba(255,255,255,0.74);
-    border: 1px solid rgba(120, 80, 130, 0.10);
-    box-shadow: 0 10px 22px rgba(105, 71, 102, 0.08);
-    height: 100%;
-}
+    .num {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #6a3f73;
+        line-height: 1;
+    }
 
-.card-title {
-    color: #5a3460;
-    font-weight: 900;
-    margin-bottom: 8px;
-}
+    .label {
+        margin-top: 6px;
+        color: #7c687b;
+        font-size: 0.92rem;
+    }
 
-.card-body {
-    color: #725a72;
-    line-height: 1.68;
-    font-size: 0.96rem;
-}
+    .panel {
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 26px;
+        background: rgba(255,255,255,0.63);
+        border: 1px solid rgba(125, 87, 140, 0.10);
+        box-shadow: 0 12px 26px rgba(105, 71, 102, 0.08);
+        position: relative;
+        z-index: 2;
+    }
 
-.chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 12px;
-}
+    .panel h2 {
+        margin: 0 0 8px 0;
+        color: #5a3460;
+        font-size: 1.35rem;
+    }
 
-.chip {
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, rgba(255, 146, 184, 0.24), rgba(173, 142, 255, 0.24));
-    border: 1px solid rgba(120, 80, 130, 0.10);
-    color: #5f3966;
-    font-weight: 700;
-    font-size: 0.92rem;
-}
+    .panel p {
+        margin: 0;
+        color: #725a72;
+        line-height: 1.72;
+    }
 
-.story {
-    padding: 14px;
-    border-radius: 20px;
-    background: rgba(255,255,255,0.74);
-    border: 1px solid rgba(120, 80, 130, 0.10);
-    margin-top: 12px;
-}
+    .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+    }
 
-.story .t {
-    color: #5a3460;
-    font-weight: 900;
-    margin-bottom: 6px;
-}
+    .chip {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, rgba(255, 146, 184, 0.24), rgba(173, 142, 255, 0.24));
+        border: 1px solid rgba(125, 87, 140, 0.10);
+        color: #5f3966;
+        font-weight: 700;
+        font-size: 0.92rem;
+    }
 
-.story .d {
-    color: #725a72;
-    line-height: 1.65;
-    font-size: 0.95rem;
-}
+    .glass {
+        padding: 16px;
+        border-radius: 22px;
+        background: rgba(255,255,255,0.76);
+        border: 1px solid rgba(125, 87, 140, 0.10);
+        box-shadow: 0 10px 22px rgba(105, 71, 102, 0.08);
+        height: 100%;
+    }
 
-div.stButton > button {
-    width: 100%;
-    border-radius: 999px;
-    border: 0;
-    padding: 0.82rem 1rem;
-    background: linear-gradient(135deg, #ff7da8, #b07cff);
-    color: white;
-    font-weight: 800;
-    box-shadow: 0 10px 24px rgba(94, 60, 97, 0.18);
-}
+    .glass-title {
+        color: #5a3460;
+        font-weight: 900;
+        margin-bottom: 8px;
+    }
 
-textarea, input, select {
-    border-radius: 16px !important;
-}
+    .glass-body {
+        color: #725a72;
+        line-height: 1.68;
+        font-size: 0.96rem;
+    }
 
-.final {
-    padding: 18px;
-    border-radius: 24px;
-    background: rgba(255,255,255,0.76);
-    border: 1px solid rgba(120, 80, 130, 0.10);
-    box-shadow: 0 12px 24px rgba(105, 71, 102, 0.08);
-    text-align: center;
-}
+    .grid2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 12px;
+    }
 
-.final h3 {
-    margin: 0 0 8px 0;
-    color: #5a3460;
-    font-size: 1.5rem;
-}
+    .grid4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 12px;
+    }
 
-.final p {
-    color: #725a72;
-    line-height: 1.7;
-    margin: 0;
-}
+    .mini {
+        padding: 14px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.76);
+        border: 1px solid rgba(125, 87, 140, 0.10);
+        box-shadow: 0 10px 22px rgba(105, 71, 102, 0.08);
+        animation: pulse 2.8s ease-in-out infinite;
+    }
 
-@media (max-width: 900px) {
-    .stats { grid-template-columns: 1fr; }
-}
-</style>
-""", unsafe_allow_html=True)
+    @keyframes pulse {
+        0%,100% { transform: translateY(0px); }
+        50% { transform: translateY(-2px); }
+    }
+
+    .mini .k {
+        color: #5a3460;
+        font-weight: 900;
+        margin-bottom: 6px;
+    }
+
+    .mini .v {
+        color: #725a72;
+        font-size: 0.95rem;
+        line-height: 1.65;
+    }
+
+    .story {
+        padding: 14px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.74);
+        border: 1px solid rgba(125, 87, 140, 0.10);
+        box-shadow: 0 10px 22px rgba(105, 71, 102, 0.08);
+        margin-top: 12px;
+    }
+
+    .story .t {
+        color: #5a3460;
+        font-weight: 900;
+        margin-bottom: 6px;
+    }
+
+    .story .d {
+        color: #725a72;
+        line-height: 1.65;
+        font-size: 0.95rem;
+    }
+
+    .final {
+        padding: 18px;
+        border-radius: 24px;
+        background: rgba(255,255,255,0.78);
+        border: 1px solid rgba(125, 87, 140, 0.10);
+        box-shadow: 0 12px 24px rgba(105, 71, 102, 0.08);
+        text-align: center;
+    }
+
+    .final h3 {
+        margin: 0 0 8px 0;
+        color: #5a3460;
+        font-size: 1.5rem;
+    }
+
+    .final p {
+        color: #725a72;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    div.stButton > button {
+        width: 100%;
+        border-radius: 999px;
+        border: 0;
+        padding: 0.82rem 1rem;
+        background: linear-gradient(135deg, #ff7da8, #b07cff);
+        color: white;
+        font-weight: 800;
+        box-shadow: 0 10px 24px rgba(94, 60, 97, 0.18);
+        transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+    }
+
+    div.stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 28px rgba(94, 60, 97, 0.22);
+    }
+
+    div.stButton > button:active {
+        transform: translateY(0px) scale(0.99);
+    }
+
+    .center {
+        text-align: center;
+    }
+
+    @media (max-width: 1100px) {
+        .grid4 { grid-template-columns: repeat(2, 1fr); }
+        .rowbox { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 700px) {
+        .grid2, .grid4 { grid-template-columns: 1fr; }
+        .hero { padding: 22px 16px; }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# ---------- FLOATING EFFECTS ----------
+hearts_html = "".join(
+    f'<span class="heart" style="left:{random.randint(0,100)}%; '
+    f'animation-duration:{random.randint(8,14)}s; '
+    f'animation-delay:{random.uniform(0,6):.2f}s; '
+    f'font-size:{random.randint(16,34)}px;">❤</span>'
+    for _ in range(20)
+)
+
+sparkles_html = "".join(
+    f'<span class="sparkle" style="left:{random.randint(0,100)}%; top:{random.randint(0,100)}%; '
+    f'width:{random.randint(8,18)}px; height:{random.randint(8,18)}px; '
+    f'background: rgba({random.randint(220,255)}, {random.randint(160,220)}, {random.randint(190,255)}, 0.35); '
+    f'animation-duration:{random.randint(5,10)}s; '
+    f'animation-delay:{random.uniform(0,4):.2f}s;"></span>'
+    for _ in range(12)
+)
+
+st.markdown(
+    f"""
+    <div class="floating">
+        {hearts_html}
+        {sparkles_html}
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # ---------- HERO ----------
-st.markdown(f"""
-<div class="hero">
-    <div class="badge">Birthday Gift for เธอ 🎂</div>
-    <div class="title">สุขสันต์วันเกิดนะเธอ 💖</div>
-    <div class="subtitle">
-        เว็บนี้ตั้งใจทำให้ดูเป็นของขวัญวันเกิดชัด ๆ สีพอดี ๆ ไม่มืดเกิน ไม่โล่งเกิน
-        และมีลูกเล่นให้กดเล่นหลายจุด
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ---------- STATS ----------
-st.markdown(f"""
-<div class="stats">
-    <div class="stat">
-        <div class="num">{days_to_birthday}</div>
-        <div class="label">วันถึงวันเกิดถัดไป</div>
-    </div>
-    <div class="stat">
-        <div class="num">{days_together}</div>
-        <div class="label">วันที่เริ่มคบกัน</div>
-    </div>
-    <div class="stat">
-        <div class="num">1</div>
-        <div class="label">คนพิเศษที่สุด</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ---------- CHIPS ----------
-st.markdown("""
-<div class="section">
-    <h2>ของที่ใส่มาในเว็บนี้</h2>
-    <p>ทำให้มันดูมีอะไร แต่ไม่ยัดจนแน่น</p>
-    <div class="chips">
-        <span class="chip">🎨 พื้นหลังมีสี</span>
-        <span class="chip">🎁 ฟีลของขวัญวันเกิด</span>
-        <span class="chip">💌 ข้อความสุ่ม</span>
-        <span class="chip">🫶 ปุ่มให้กดเล่น</span>
-        <span class="chip">🎚️ เลื่อนระดับฟีล</span>
-        <span class="chip">📖 อ่านง่ายขึ้น</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ---------- TABS ----------
-tab1, tab2, tab3, tab4 = st.tabs(["หน้าแรก", "ความทรงจำ", "เล่นนิดนึง", "ปิดท้าย"])
-
-with tab1:
-    c1, c2 = st.columns([1.2, 1])
-    with c1:
-        st.markdown("""
-        <div class="card">
-            <div class="card-title">ข้อความแรก</div>
-            <div class="card-body">
-                วันนี้เป็นวันของเธอจริง ๆ
-                เราเลยอยากทำเว็บที่ดูเป็นของขวัญมากกว่าดูเหมือนหน้าแอปธรรมดา
-                และตั้งใจให้โทนมันสว่างพอดี ไม่มืดทึบ
-            </div>
+st.markdown(
+    f"""
+    <div class="hero">
+        <div class="badge">Birthday Gift for เธอ 🎂</div>
+        <div class="title">สุขสันต์วันเกิดนะเธอ 💖</div>
+        <div class="subtitle">
+            วันนี้เป็นวันของเธอจริง ๆ เว็บนี้เลยทำให้ดูเป็นของขวัญ ไม่ใช่เว็บเปล่า ๆ
+            มีเอฟเฟกต์ มีปุ่มกด มีสีพอดี ๆ และมีจุดให้เล่นหลายแบบ
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
-        if st.button("สุ่มข้อความวันเกิด"):
-            st.session_state.quote_index = random.randint(0, len(quotes) - 1)
+st.markdown(
+    f"""
+    <div class="rowbox">
+        <div class="stat"><div class="num">{days_to_birthday}</div><div class="label">วันถึงวันเกิดถัดไป</div></div>
+        <div class="stat"><div class="num">{days_together}</div><div class="label">วันที่เริ่มคบกัน</div></div>
+        <div class="stat"><div class="num">1</div><div class="label">คนพิเศษ</div></div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
-        st.markdown(f"""
+st.markdown(
+    """
+    <div class="panel">
+        <h2>ลูกเล่นในเว็บนี้</h2>
+        <p>มีหลายอย่างให้กดและเปลี่ยน ไม่ดูนิ่งหรือโล่งจนเกินไป</p>
+        <div class="chips">
+            <span class="chip">🎨 พื้นหลังไล่เฉด</span>
+            <span class="chip">💫 หัวใจลอย</span>
+            <span class="chip">✨ จุดประกาย</span>
+            <span class="chip">🎁 ปุ่มเซอร์ไพรส์</span>
+            <span class="chip">🫶 สุ่มข้อความ</span>
+            <span class="chip">🎚️ สไลเดอร์ฟีล</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# ---------- LAYOUT ----------
+colA, colB = st.columns([1.2, 0.8])
+
+with colA:
+    st.markdown(
+        """
+        <div class="panel">
+            <h2>ข้อความแรก</h2>
+            <p>ไม่ได้อยากให้เว็บนี้ยาวจนเหนื่อย แค่อยากให้มันดูตั้งใจและมีอารมณ์ของของขวัญจริง ๆ</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if st.button("สุ่มข้อความวันเกิด"):
+        st.session_state.quote_index = (st.session_state.quote_index + 1) % len(quotes)
+
+    st.markdown(
+        f"""
         <div class="final" style="margin-top:12px; text-align:left;">
-            <h3>ข้อความที่สุ่มได้</h3>
-            <p>{quotes[st.session_state.quote_index]}</p>
+            <h3>{quotes[st.session_state.quote_index]}</h3>
+            <p>กดแล้วข้อความจะเปลี่ยนไปอีก</p>
         </div>
-        """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
-    with c2:
-        st.markdown("""
-        <div class="card">
-            <div class="card-title">สิ่งที่อยากให้เธอรู้</div>
-            <div class="card-body">
-                ไม่ต้องอ่านเยอะก็ได้ แค่เปิดมาแล้วรู้สึกว่าเว็บนี้ตั้งใจทำเพื่อเธอจริง ๆ ก็พอ
-            </div>
+    if st.button("เพิ่มจังหวะของเว็บ"):
+        st.session_state.spark_count += 1
+        st.balloons()
+
+    st.markdown(
+        f"""
+        <div class="story">
+            <div class="t">จำนวนครั้งที่กด</div>
+            <div class="d">{st.session_state.spark_count} ครั้ง</div>
         </div>
-        """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
-        if st.button("เปลี่ยนบรรยากาศ"):
-            st.session_state.clicks += 1
-
-        st.markdown(f"""
-        <div class="final" style="margin-top:12px; text-align:left;">
-            <h3>กดเล่นแล้ว</h3>
-            <p>{st.session_state.clicks} ครั้ง</p>
+with colB:
+    st.markdown(
+        """
+        <div class="panel">
+            <h2>ความทรงจำสั้น ๆ</h2>
+            <p>กดเพื่อสลับข้อความให้ดูมีการเคลื่อนไหว</p>
         </div>
-        """, unsafe_allow_html=True)
-
-with tab2:
-    st.markdown("""
-    <div class="section">
-        <h2>ความทรงจำสั้น ๆ</h2>
-        <p>ไม่ยาว แต่พอให้รู้ว่ามันมีเรื่องของเราอยู่</p>
-    </div>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
     if st.button("สุ่มความทรงจำ"):
-        st.session_state.memory_index = random.randint(0, len(memories) - 1)
+        st.session_state.note_index = (st.session_state.note_index + 1) % len(mini_notes)
 
-    st.markdown(f"""
-    <div class="final" style="text-align:left;">
-        <h3>{memories[st.session_state.memory_index]}</h3>
-        <p>อันนี้คือโมเมนต์สั้น ๆ ที่อยากเก็บไว้ในเว็บของขวัญนี้</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class="final" style="margin-top:12px; text-align:left;">
+            <h3>{mini_notes[st.session_state.note_index]}</h3>
+            <p>อันนี้สุ่มวนได้</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    st.markdown("""
-    <div class="story">
-        <div class="t">วันแรก</div>
-        <div class="d">เริ่มคบกัน แล้วมันก็กลายเป็นเรื่องสำคัญขึ้นเรื่อย ๆ</div>
-    </div>
-    <div class="story">
-        <div class="t">วันเกิดนี้</div>
-        <div class="d">เลยอยากทำให้มันดูพิเศษกว่าวันปกติ</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with tab3:
-    st.markdown("""
-    <div class="section">
-        <h2>เล่นสักหน่อย</h2>
-        <p>มีตัวเลือกให้เว็บตอบกลับแบบสั้น ๆ</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    mood = st.slider("ระดับความอบอุ่น", 0, 100, 63)
+    mood = st.slider("ระดับความอบอุ่นของวัน", 0, 100, st.session_state.mood)
+    st.session_state.mood = mood
     st.progress(mood / 100)
 
-    if mood < 35:
-        mood_text = "ยังนุ่ม ๆ อยู่ แต่มีสีสันขึ้นแล้ว"
-    elif mood < 75:
-        mood_text = "เริ่มเข้าฟีลของของขวัญวันเกิดแล้ว"
+    if mood < 30:
+        msg = "ยังนุ่ม ๆ อยู่"
+    elif mood < 70:
+        msg = "เริ่มเหมือนของขวัญแล้ว"
     else:
-        mood_text = "โอเค ตอนนี้มันเป็นของขวัญจริงจังแล้ว"
+        msg = "ตอนนี้ดูเป็นวันพิเศษชัดเจน"
 
-    st.markdown(f"""
-    <div class="final" style="margin-top:12px; text-align:left;">
-        <h3>ผลลัพธ์</h3>
-        <p>{mood_text}</p>
+    st.markdown(
+        f"""
+        <div class="story">
+            <div class="t">ผลลัพธ์</div>
+            <div class="d">{msg}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# ---------- MORE SECTIONS ----------
+st.markdown(
+    """
+    <div class="panel">
+        <h2>4 ช่องสั้น ๆ</h2>
+        <p>ช่วยให้หน้าดูแน่นขึ้นโดยไม่ต้องใส่ข้อความเยอะเกิน</p>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
 
-    vibe = st.radio("เลือกฟีลของเว็บ", ["หวานนิด ๆ", "อบอุ่นพอดี", "เรียบแต่พิเศษ", "น่ารักแบบไม่เยอะ"], horizontal=True)
+g1, g2, g3, g4 = st.columns(4)
+blocks = [
+    ("✨", "วันนี้", "วันของเธอ"),
+    ("🎁", "เว็บนี้", "ตั้งใจทำจริง"),
+    ("💌", "ข้อความ", "สั้นแต่ตรง"),
+    ("🫶", "ฟีล", "อบอุ่นพอดี"),
+]
+for col, (a, b, c) in zip([g1, g2, g3, g4], blocks):
+    with col:
+        st.markdown(
+            f"""
+            <div class="mini">
+                <div class="k">{a} {b}</div>
+                <div class="v">{c}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    st.markdown(f"""
-    <div class="story">
-        <div class="t">ฟีลที่เลือก</div>
-        <div class="d">{vibe}</div>
+# ---------- INTERACTION ----------
+st.markdown(
+    """
+    <div class="panel">
+        <h2>เล่นสักหน่อย</h2>
+        <p>มีปุ่มให้เปิดของขวัญและเปลี่ยนโหมดจบ</p>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
 
-with tab4:
-    st.markdown("""
-    <div class="section">
-        <h2>ปิดท้าย</h2>
-        <p>มีปุ่มเซอร์ไพรส์ไว้ให้กดตอนจบ</p>
+c1, c2 = st.columns(2)
+with c1:
+    if st.button("เปิดของขวัญ 🎀"):
+        st.session_state.gift_open = True
+        st.snow()
+
+with c2:
+    if st.button("เปิดประกาย ✨"):
+        st.session_state.gift_open = True
+        st.balloons()
+
+if st.session_state.gift_open:
+    st.markdown(
+        """
+        <div class="final center">
+            <h3>ของขวัญวันเกิดของเธอ</h3>
+            <p>
+                ขอให้วันนี้มีแต่เรื่องดี ๆ และหวังว่าเว็บนี้จะทำให้เธอรู้สึกว่า
+                มันเป็นของขวัญที่ตั้งใจทำจริง ไม่ใช่หน้าเว็บธรรมดา
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# ---------- SECRET NOTE ----------
+st.markdown(
+    """
+    <div class="panel">
+        <h2>ข้อความลับ</h2>
+        <p>กดเปิดเมื่อพร้อม</p>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
 
-    nickname = st.text_input("ชื่อเล่นที่อยากใช้", value="ครีม")
-    note = st.text_area("ข้อความถึงเธอ", value="สุขสันต์วันเกิดนะเธอ ขอบคุณที่อยู่ด้วยกัน และขอให้วันนี้เป็นวันที่ดีมาก ๆ", height=110)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("เปิดของขวัญ 🎁"):
-            st.session_state.gift_open = True
-            st.balloons()
-
-    with col2:
-        if st.button("เพิ่มประกาย ✨"):
-            st.snow()
-
-    if st.session_state.gift_open:
-        st.markdown(f"""
+st.checkbox("เปิดข้อความลับ", key="secret_open")
+if st.session_state.secret_open:
+    st.markdown(
+        """
         <div class="final">
             <h3>สุขสันต์วันเกิดนะเธอ 💖</h3>
             <p>
-                {note}<br><br>
-                ถึงจะเรียก {nickname} บ้าง หรือเรียกเธอบ่อย ๆ บ้าง
-                แต่เว็บนี้ตั้งใจทำมาเพื่อเธอจริง ๆ
+                ถึงจะเรียกครีมบ้าง แต่ส่วนใหญ่ก็ยังชอบเรียกเธออยู่ดี
+                เว็บนี้ตั้งใจให้มีสี มีจังหวะ มีลูกเล่น และเป็นของขวัญที่ดูพิเศษจริง ๆ
             </p>
         </div>
-        """, unsafe_allow_html=True)
-
-    st.download_button(
-        "ดาวน์โหลดข้อความนี้",
-        data=note,
-        file_name="birthday_message.txt",
-        mime="text/plain",
-        use_container_width=True
+        """,
+        unsafe_allow_html=True,
     )
