@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import date
+from html import escape
 import random
 
 st.set_page_config(
@@ -9,49 +10,85 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ---------- DATA ----------
-start_date = date(2024, 2, 14)
+# -------------------- DATE --------------------
 today = date.today()
-days_together = (today - start_date).days
-
-birthday_month = 6
-birthday_day = 26
-birthday_this_year = date(today.year, birthday_month, birthday_day)
-next_birthday = birthday_this_year if today <= birthday_this_year else date(today.year + 1, birthday_month, birthday_day)
+birthday_this_year = date(today.year, 6, 26)
+next_birthday = birthday_this_year if today <= birthday_this_year else date(today.year + 1, 6, 26)
 days_to_birthday = (next_birthday - today).days
 
-quotes = [
-    "สุขสันต์วันเกิดนะเธอ 💖",
-    "วันนี้เป็นวันของเธอ",
-    "ขอให้ปีนี้มีแต่เรื่องดี ๆ",
-    "ของขวัญชิ้นนี้ตั้งใจทำให้เธอ",
-    "เธอคือคนสำคัญของเราเสมอ",
+# -------------------- DATA --------------------
+wishes = [
+    "สุขสันต์วันเกิดนะเธอ ขอให้วันนี้มีแต่คนใจดีกับเธอ",
+    "ขอให้ปีนี้เบาขึ้นนิดนึง แล้วก็มีเรื่องดี ๆ โผล่มาแบบไม่ทันตั้งตัว",
+    "ขอให้เธอได้ยิ้มเยอะ ๆ กินของอร่อย ๆ และไม่ต้องคิดเยอะ",
+    "วันนี้เป็นวันของเธอ ลองใจดีกับตัวเองหน่อยก็ได้",
+    "ขอให้ทุกอย่างที่เหนื่อยอยู่ ค่อย ๆ เบาลงทีละนิด",
+    "ขอให้เธอเจอแต่วันสบายใจ แบบไม่ต้องฝืนอะไรเลย",
+    "ไม่ต้องพยายามเป็นคนเพอร์เฟกต์ แค่เป็นเธอก็พอ",
+    "ขอให้ปีนี้มีแต่เรื่องน่ารัก ๆ และเรื่องหนัก ๆ หายไปไกล ๆ",
+    "สุขสันต์วันเกิดนะ ขอให้เธอมีความสุขแบบเต็ม ๆ",
+    "ขอให้เธอยิ้มได้ง่ายกว่าที่ผ่านมา",
+    "อยากให้วันนี้เป็นวันที่เธอรู้สึกว่าตัวเองสำคัญมาก",
+    "ขอให้วันนี้ดีพอจนเธออยากจำไปอีกนาน",
 ]
 
-mini_notes = [
+tiny_notes = [
+    "เธอทำให้วันธรรมดาดูดีขึ้น",
+    "บางทีแค่มีเธออยู่ก็พอแล้ว",
+    "ไม่ต้องเยอะ แต่ขอให้เป็นเรื่องของเธอ",
+    "วันพิเศษแบบนี้ควรมีรอยยิ้มเยอะ ๆ",
+    "ของขวัญชิ้นนี้ตั้งใจทำจริง ๆ",
+]
+
+memories = [
+    "วันที่คุยกันแล้วรู้สึกว่าไม่อยากวางมือถือ",
+    "วันที่งอนกันนิดหน่อย แต่สุดท้ายก็กลับมาคุยกัน",
+    "วันที่ยิ้มเพราะอีกฝ่ายแบบไม่รู้ตัว",
+    "วันที่ธรรมดามาก แต่กลับจำได้ชัด",
+    "วันที่รู้สึกว่าเธอสำคัญขึ้นเรื่อย ๆ",
+]
+
+moods = [
+    "อยากได้ฟีลน่ารัก ๆ",
+    "อยากได้ฟีลอบอุ่น",
+    "อยากได้ฟีลขี้เล่น",
+    "อยากได้ฟีลเงียบ ๆ แต่กินใจ",
+]
+
+gift_types = [
+    "ข้อความสั้น ๆ",
+    "คำอวยพรยาวหน่อย",
+    "ของขวัญแบบกดเล่นได้",
+    "อะไรที่ดูตั้งใจมาก ๆ",
+]
+
+reasons = [
     "อยู่ด้วยแล้วสบายใจ",
-    "แค่คุยกันก็ดีแล้ว",
-    "วันธรรมดาก็พิเศษได้",
-    "ไม่ต้องเยอะ แต่ต้องจริงใจ",
-    "เธอคือคนพิเศษของวันนี้",
+    "คุยด้วยแล้วไม่อึดอัด",
+    "เป็นตัวเองได้",
+    "ทำให้วันธรรมดาไม่ธรรมดา",
+    "เป็นเธอแบบนี้แหละ ดีแล้ว",
 ]
 
-if "page" not in st.session_state:
-    st.session_state.page = 0
-if "quote_index" not in st.session_state:
-    st.session_state.quote_index = 0
+# -------------------- STATE --------------------
+if "wish_index" not in st.session_state:
+    st.session_state.wish_index = 0
 if "note_index" not in st.session_state:
     st.session_state.note_index = 0
-if "spark_count" not in st.session_state:
-    st.session_state.spark_count = 0
+if "cake_candles" not in st.session_state:
+    st.session_state.cake_candles = 5
 if "gift_open" not in st.session_state:
     st.session_state.gift_open = False
 if "secret_open" not in st.session_state:
     st.session_state.secret_open = False
-if "mood" not in st.session_state:
-    st.session_state.mood = 68
+if "spark_count" not in st.session_state:
+    st.session_state.spark_count = 0
+if "memory_index" not in st.session_state:
+    st.session_state.memory_index = 0
+if "mood_value" not in st.session_state:
+    st.session_state.mood_value = 68
 
-# ---------- CSS ----------
+# -------------------- CSS --------------------
 st.markdown(
     """
     <style>
@@ -59,20 +96,20 @@ st.markdown(
 
     .stApp {
         background:
-            radial-gradient(circle at 15% 15%, rgba(255, 168, 198, 0.55), transparent 24%),
-            radial-gradient(circle at 85% 20%, rgba(171, 145, 255, 0.38), transparent 22%),
-            radial-gradient(circle at 50% 95%, rgba(255, 214, 142, 0.30), transparent 26%),
-            linear-gradient(135deg, #fde8ef 0%, #f4e8ff 46%, #fff1dd 100%);
+            radial-gradient(circle at 15% 15%, rgba(255, 160, 194, 0.45), transparent 24%),
+            radial-gradient(circle at 85% 20%, rgba(178, 152, 255, 0.30), transparent 22%),
+            radial-gradient(circle at 50% 95%, rgba(255, 216, 155, 0.24), transparent 28%),
+            linear-gradient(135deg, #fde9f1 0%, #f5ecff 46%, #fff2de 100%);
         background-attachment: fixed;
     }
 
     .block-container {
-        max-width: 1200px;
+        max-width: 1240px;
         padding-top: 1rem;
         padding-bottom: 2.5rem;
     }
 
-    .floating {
+    .float-wrap {
         position: fixed;
         inset: 0;
         pointer-events: none;
@@ -80,101 +117,104 @@ st.markdown(
         z-index: 0;
     }
 
-    .heart {
+    .heart, .spark {
         position: absolute;
-        bottom: -40px;
-        opacity: 0.22;
-        animation: floatUp linear infinite;
         user-select: none;
-        filter: blur(0.1px);
+        pointer-events: none;
+        opacity: 0.22;
     }
 
-    .sparkle {
-        position: absolute;
+    .heart {
+        bottom: -40px;
+        animation: floatUp linear infinite;
+    }
+
+    .spark {
         border-radius: 999px;
-        opacity: 0.35;
-        animation: drift linear infinite;
+        animation: drift ease-in-out infinite;
+        opacity: 0.34;
     }
 
     @keyframes floatUp {
         0% { transform: translateY(0) scale(0.9) rotate(0deg); opacity: 0; }
-        10% { opacity: 0.28; }
-        100% { transform: translateY(-115vh) scale(1.2) rotate(18deg); opacity: 0; }
+        12% { opacity: 0.28; }
+        100% { transform: translateY(-115vh) scale(1.2) rotate(20deg); opacity: 0; }
     }
 
     @keyframes drift {
-        0% { transform: translateY(0) translateX(0); opacity: 0.15; }
-        50% { transform: translateY(-18px) translateX(20px); opacity: 0.32; }
-        100% { transform: translateY(0) translateX(0); opacity: 0.15; }
+        0%, 100% { transform: translateY(0) translateX(0); }
+        50% { transform: translateY(-14px) translateX(12px); }
     }
 
     .hero {
         position: relative;
         z-index: 2;
-        padding: 28px 22px;
-        border-radius: 30px;
-        background: rgba(255,255,255,0.68);
-        border: 1px solid rgba(125, 87, 140, 0.10);
-        box-shadow: 0 18px 40px rgba(105, 71, 102, 0.11);
-        backdrop-filter: blur(10px);
+        padding: 30px 24px;
+        border-radius: 32px;
+        background: rgba(255,255,255,0.72);
+        border: 1px solid rgba(130, 84, 144, 0.10);
+        box-shadow: 0 18px 40px rgba(106, 72, 104, 0.10);
         text-align: center;
         margin-bottom: 18px;
+        backdrop-filter: blur(10px);
     }
 
     .badge {
         display: inline-block;
         padding: 7px 14px;
         border-radius: 999px;
-        background: rgba(255,255,255,0.82);
-        border: 1px solid rgba(125, 87, 140, 0.10);
-        color: #8a5e8f;
+        background: rgba(255,255,255,0.86);
+        border: 1px solid rgba(130, 84, 144, 0.10);
+        color: #8b5e91;
         font-weight: 800;
         margin-bottom: 12px;
         font-size: 0.92rem;
     }
 
     .title {
-        font-size: clamp(2.3rem, 5vw, 4.3rem);
+        font-size: clamp(2.2rem, 5vw, 4.3rem);
         font-weight: 900;
         margin: 0;
-        color: #5a3460;
+        color: #5b3563;
         letter-spacing: -0.03em;
     }
 
     .subtitle {
         margin: 12px auto 0 auto;
-        max-width: 820px;
-        color: #6f5a73;
-        line-height: 1.75;
+        max-width: 840px;
+        color: #725a72;
+        line-height: 1.78;
         font-size: 1rem;
     }
 
-    .rowbox {
+    .topgrid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
         margin-top: 18px;
+        position: relative;
+        z-index: 2;
     }
 
     .stat {
-        background: rgba(255,255,255,0.72);
-        border: 1px solid rgba(125, 87, 140, 0.10);
+        background: rgba(255,255,255,0.74);
+        border: 1px solid rgba(130, 84, 144, 0.10);
         border-radius: 22px;
         padding: 16px 14px;
-        box-shadow: 0 10px 22px rgba(105, 71, 102, 0.08);
+        box-shadow: 0 10px 22px rgba(106, 72, 104, 0.08);
         text-align: center;
     }
 
     .num {
         font-size: 2rem;
         font-weight: 900;
-        color: #6a3f73;
+        color: #6c4074;
         line-height: 1;
     }
 
     .label {
         margin-top: 6px;
-        color: #7c687b;
+        color: #7b687b;
         font-size: 0.92rem;
     }
 
@@ -182,22 +222,23 @@ st.markdown(
         margin-top: 18px;
         padding: 18px;
         border-radius: 26px;
-        background: rgba(255,255,255,0.63);
-        border: 1px solid rgba(125, 87, 140, 0.10);
-        box-shadow: 0 12px 26px rgba(105, 71, 102, 0.08);
+        background: rgba(255,255,255,0.66);
+        border: 1px solid rgba(130, 84, 144, 0.10);
+        box-shadow: 0 12px 26px rgba(106, 72, 104, 0.08);
         position: relative;
         z-index: 2;
+        backdrop-filter: blur(8px);
     }
 
     .panel h2 {
         margin: 0 0 8px 0;
-        color: #5a3460;
+        color: #5b3563;
         font-size: 1.35rem;
     }
 
     .panel p {
         margin: 0;
-        color: #725a72;
+        color: #735b73;
         line-height: 1.72;
     }
 
@@ -212,31 +253,10 @@ st.markdown(
         padding: 8px 12px;
         border-radius: 999px;
         background: linear-gradient(135deg, rgba(255, 146, 184, 0.24), rgba(173, 142, 255, 0.24));
-        border: 1px solid rgba(125, 87, 140, 0.10);
+        border: 1px solid rgba(130, 84, 144, 0.10);
         color: #5f3966;
         font-weight: 700;
         font-size: 0.92rem;
-    }
-
-    .glass {
-        padding: 16px;
-        border-radius: 22px;
-        background: rgba(255,255,255,0.76);
-        border: 1px solid rgba(125, 87, 140, 0.10);
-        box-shadow: 0 10px 22px rgba(105, 71, 102, 0.08);
-        height: 100%;
-    }
-
-    .glass-title {
-        color: #5a3460;
-        font-weight: 900;
-        margin-bottom: 8px;
-    }
-
-    .glass-body {
-        color: #725a72;
-        line-height: 1.68;
-        font-size: 0.96rem;
     }
 
     .grid2 {
@@ -253,49 +273,44 @@ st.markdown(
         margin-top: 12px;
     }
 
-    .mini {
-        padding: 14px;
-        border-radius: 20px;
-        background: rgba(255,255,255,0.76);
-        border: 1px solid rgba(125, 87, 140, 0.10);
-        box-shadow: 0 10px 22px rgba(105, 71, 102, 0.08);
-        animation: pulse 2.8s ease-in-out infinite;
+    .glass {
+        padding: 16px;
+        border-radius: 22px;
+        background: rgba(255,255,255,0.78);
+        border: 1px solid rgba(130, 84, 144, 0.10);
+        box-shadow: 0 10px 22px rgba(106, 72, 104, 0.08);
+        height: 100%;
     }
 
-    @keyframes pulse {
-        0%,100% { transform: translateY(0px); }
-        50% { transform: translateY(-2px); }
-    }
-
-    .mini .k {
-        color: #5a3460;
+    .gtitle {
+        color: #5b3563;
         font-weight: 900;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
 
-    .mini .v {
-        color: #725a72;
-        font-size: 0.95rem;
-        line-height: 1.65;
+    .gbody {
+        color: #735b73;
+        line-height: 1.68;
+        font-size: 0.96rem;
     }
 
     .story {
         padding: 14px;
         border-radius: 20px;
-        background: rgba(255,255,255,0.74);
-        border: 1px solid rgba(125, 87, 140, 0.10);
-        box-shadow: 0 10px 22px rgba(105, 71, 102, 0.08);
+        background: rgba(255,255,255,0.76);
+        border: 1px solid rgba(130, 84, 144, 0.10);
+        box-shadow: 0 10px 22px rgba(106, 72, 104, 0.08);
         margin-top: 12px;
     }
 
     .story .t {
-        color: #5a3460;
+        color: #5b3563;
         font-weight: 900;
         margin-bottom: 6px;
     }
 
     .story .d {
-        color: #725a72;
+        color: #735b73;
         line-height: 1.65;
         font-size: 0.95rem;
     }
@@ -303,22 +318,29 @@ st.markdown(
     .final {
         padding: 18px;
         border-radius: 24px;
-        background: rgba(255,255,255,0.78);
-        border: 1px solid rgba(125, 87, 140, 0.10);
-        box-shadow: 0 12px 24px rgba(105, 71, 102, 0.08);
+        background: rgba(255,255,255,0.80);
+        border: 1px solid rgba(130, 84, 144, 0.10);
+        box-shadow: 0 12px 24px rgba(106, 72, 104, 0.08);
         text-align: center;
     }
 
     .final h3 {
         margin: 0 0 8px 0;
-        color: #5a3460;
-        font-size: 1.5rem;
+        color: #5b3563;
+        font-size: 1.45rem;
     }
 
     .final p {
-        color: #725a72;
+        color: #735b73;
         line-height: 1.7;
         margin: 0;
+    }
+
+    .bigtext {
+        color: #5b3563;
+        font-size: 1.1rem;
+        line-height: 1.8;
+        font-weight: 700;
     }
 
     div.stButton > button {
@@ -330,7 +352,7 @@ st.markdown(
         color: white;
         font-weight: 800;
         box-shadow: 0 10px 24px rgba(94, 60, 97, 0.18);
-        transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+        transition: transform 0.16s ease, box-shadow 0.16s ease;
     }
 
     div.stButton > button:hover {
@@ -338,21 +360,12 @@ st.markdown(
         box-shadow: 0 14px 28px rgba(94, 60, 97, 0.22);
     }
 
-    div.stButton > button:active {
-        transform: translateY(0px) scale(0.99);
-    }
-
-    .center {
-        text-align: center;
-    }
-
     @media (max-width: 1100px) {
-        .grid4 { grid-template-columns: repeat(2, 1fr); }
-        .rowbox { grid-template-columns: 1fr; }
+        .topgrid, .grid4 { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (max-width: 700px) {
-        .grid2, .grid4 { grid-template-columns: 1fr; }
+        .topgrid, .grid2, .grid4 { grid-template-columns: 1fr; }
         .hero { padding: 22px 16px; }
     }
     </style>
@@ -360,17 +373,17 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ---------- FLOATING EFFECTS ----------
+# -------------------- FLOATING EFFECTS --------------------
 hearts_html = "".join(
     f'<span class="heart" style="left:{random.randint(0,100)}%; '
+    f'font-size:{random.randint(16,32)}px; '
     f'animation-duration:{random.randint(8,14)}s; '
-    f'animation-delay:{random.uniform(0,6):.2f}s; '
-    f'font-size:{random.randint(16,34)}px;">❤</span>'
-    for _ in range(20)
+    f'animation-delay:{random.uniform(0,6):.2f}s;">❤</span>'
+    for _ in range(18)
 )
 
 sparkles_html = "".join(
-    f'<span class="sparkle" style="left:{random.randint(0,100)}%; top:{random.randint(0,100)}%; '
+    f'<span class="spark" style="left:{random.randint(0,100)}%; top:{random.randint(0,100)}%; '
     f'width:{random.randint(8,18)}px; height:{random.randint(8,18)}px; '
     f'background: rgba({random.randint(220,255)}, {random.randint(160,220)}, {random.randint(190,255)}, 0.35); '
     f'animation-duration:{random.randint(5,10)}s; '
@@ -380,7 +393,7 @@ sparkles_html = "".join(
 
 st.markdown(
     f"""
-    <div class="floating">
+    <div class="float-wrap">
         {hearts_html}
         {sparkles_html}
     </div>
@@ -388,43 +401,55 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ---------- HERO ----------
+def wrap_card(title, body):
+    return f"""
+    <div class="glass">
+        <div class="gtitle">{title}</div>
+        <div class="gbody">{body}</div>
+    </div>
+    """
+
+# -------------------- HERO --------------------
 st.markdown(
-    f"""
+    """
     <div class="hero">
         <div class="badge">Birthday Gift for เธอ 🎂</div>
         <div class="title">สุขสันต์วันเกิดนะเธอ 💖</div>
         <div class="subtitle">
-            วันนี้เป็นวันของเธอจริง ๆ เว็บนี้เลยทำให้ดูเป็นของขวัญ ไม่ใช่เว็บเปล่า ๆ
-            มีเอฟเฟกต์ มีปุ่มกด มีสีพอดี ๆ และมีจุดให้เล่นหลายแบบ
+            วันนี้ไม่ต้องคิดอะไรเยอะ ขอให้มันเป็นวันของเธอจริง ๆ
+            เปิดมาแล้วกดเล่นได้ มีอะไรให้ยิ้ม มีอะไรให้เซอร์ไพรส์
+            และไม่ใช่หน้าเว็บโล่ง ๆ ที่ดูแล้วจบในสิบวิ
         </div>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
+# -------------------- TOP STAT --------------------
 st.markdown(
     f"""
-    <div class="rowbox">
+    <div class="topgrid">
         <div class="stat"><div class="num">{days_to_birthday}</div><div class="label">วันถึงวันเกิดถัดไป</div></div>
-        <div class="stat"><div class="num">{days_together}</div><div class="label">วันที่เริ่มคบกัน</div></div>
-        <div class="stat"><div class="num">1</div><div class="label">คนพิเศษ</div></div>
+        <div class="stat"><div class="num">1</div><div class="label">วันพิเศษของเธอ</div></div>
+        <div class="stat"><div class="num">∞</div><div class="label">ความตั้งใจ</div></div>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
+# -------------------- FEATURE CHIPS --------------------
 st.markdown(
     """
     <div class="panel">
-        <h2>ลูกเล่นในเว็บนี้</h2>
-        <p>มีหลายอย่างให้กดและเปลี่ยน ไม่ดูนิ่งหรือโล่งจนเกินไป</p>
+        <h2>ของที่ใส่มาให้เว็บไม่เงียบ</h2>
+        <p>เปิดแล้วมีอะไรให้เล่น ไม่ใช่แค่ดูแล้วผ่านไป</p>
         <div class="chips">
-            <span class="chip">🎨 พื้นหลังไล่เฉด</span>
+            <span class="chip">🎨 สีละมุน</span>
             <span class="chip">💫 หัวใจลอย</span>
-            <span class="chip">✨ จุดประกาย</span>
-            <span class="chip">🎁 ปุ่มเซอร์ไพรส์</span>
-            <span class="chip">🫶 สุ่มข้อความ</span>
+            <span class="chip">✨ ประกายวิบวับ</span>
+            <span class="chip">🎁 เปิดของขวัญ</span>
+            <span class="chip">🫶 สุ่มคำอวยพร</span>
+            <span class="chip">🎂 เป่าเค้ก</span>
             <span class="chip">🎚️ สไลเดอร์ฟีล</span>
         </div>
     </div>
@@ -432,98 +457,101 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ---------- LAYOUT ----------
-colA, colB = st.columns([1.2, 0.8])
+# -------------------- ACTIONS --------------------
+c1, c2, c3 = st.columns(3)
 
-with colA:
-    st.markdown(
-        """
-        <div class="panel">
-            <h2>ข้อความแรก</h2>
-            <p>ไม่ได้อยากให้เว็บนี้ยาวจนเหนื่อย แค่อยากให้มันดูตั้งใจและมีอารมณ์ของของขวัญจริง ๆ</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    if st.button("สุ่มข้อความวันเกิด"):
-        st.session_state.quote_index = (st.session_state.quote_index + 1) % len(quotes)
-
-    st.markdown(
-        f"""
-        <div class="final" style="margin-top:12px; text-align:left;">
-            <h3>{quotes[st.session_state.quote_index]}</h3>
-            <p>กดแล้วข้อความจะเปลี่ยนไปอีก</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    if st.button("เพิ่มจังหวะของเว็บ"):
+with c1:
+    if st.button("สุ่มคำอวยพร 🎀"):
+        st.session_state.wish_index = random.randint(0, len(wishes) - 1)
         st.session_state.spark_count += 1
+
+with c2:
+    if st.button("จุดเทียน 🕯️"):
+        st.session_state.cake_candles = 5
+        st.session_state.spark_count += 1
+
+with c3:
+    if st.button("เป่าเค้ก 🎉"):
+        st.session_state.cake_candles = 0
+        st.session_state.gift_open = True
         st.balloons()
 
+candles = "🕯️ " * st.session_state.cake_candles if st.session_state.cake_candles > 0 else "✨ 🎂 ✨"
+
+st.markdown(
+    f"""
+    <div class="panel center">
+        <h2>เค้กของวันนี้</h2>
+        <p style="margin-bottom:10px;">แตะปุ่มด้านบนแล้วดูว่าเทียนจะเปลี่ยนยังไง</p>
+        <div class="bigtext" style="font-size:2rem;">{candles}</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# -------------------- MAIN GRID --------------------
+left, right = st.columns([1.1, 0.9])
+
+with left:
+    st.markdown(wrap_card("คำอวยพรที่สุ่มได้", wishes[st.session_state.wish_index]), unsafe_allow_html=True)
     st.markdown(
         f"""
         <div class="story">
-            <div class="t">จำนวนครั้งที่กด</div>
+            <div class="t">ปุ่มที่กดไปแล้ว</div>
             <div class="d">{st.session_state.spark_count} ครั้ง</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-with colB:
-    st.markdown(
-        """
-        <div class="panel">
-            <h2>ความทรงจำสั้น ๆ</h2>
-            <p>กดเพื่อสลับข้อความให้ดูมีการเคลื่อนไหว</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    if st.button("กดให้มีประกาย ✨"):
+        st.session_state.gift_open = True
+        st.snow()
 
-    if st.button("สุ่มความทรงจำ"):
-        st.session_state.note_index = (st.session_state.note_index + 1) % len(mini_notes)
+    if st.session_state.gift_open:
+        st.markdown(
+            """
+            <div class="final">
+                <h3>เปิดของขวัญแล้ว</h3>
+                <p>วันนี้เป็นวันของเธอจริง ๆ ขอให้มันดีแบบที่จำได้ไปอีกนาน</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    st.markdown(
-        f"""
-        <div class="final" style="margin-top:12px; text-align:left;">
-            <h3>{mini_notes[st.session_state.note_index]}</h3>
-            <p>อันนี้สุ่มวนได้</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+with right:
+    nickname = st.text_input("ถ้าอยากใส่ชื่อเล่น", value="ครีม")
+    nickname = escape(nickname.strip() or "ครีม")
 
-    mood = st.slider("ระดับความอบอุ่นของวัน", 0, 100, st.session_state.mood)
-    st.session_state.mood = mood
-    st.progress(mood / 100)
-
-    if mood < 30:
-        msg = "ยังนุ่ม ๆ อยู่"
-    elif mood < 70:
-        msg = "เริ่มเหมือนของขวัญแล้ว"
-    else:
-        msg = "ตอนนี้ดูเป็นวันพิเศษชัดเจน"
+    vibe = st.selectbox("วันนี้อยากได้ฟีลแบบไหน", moods)
+    gift = st.selectbox("ของขวัญที่เข้ากับวันนี้", gift_types)
 
     st.markdown(
         f"""
         <div class="story">
-            <div class="t">ผลลัพธ์</div>
-            <div class="d">{msg}</div>
+            <div class="t">ฟีลที่เลือก</div>
+            <div class="d">{vibe}</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-# ---------- MORE SECTIONS ----------
+    st.markdown(
+        f"""
+        <div class="story">
+            <div class="t">ของขวัญแบบที่เหมาะ</div>
+            <div class="d">{gift}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# -------------------- 4 SMALL CARDS --------------------
 st.markdown(
     """
     <div class="panel">
-        <h2>4 ช่องสั้น ๆ</h2>
-        <p>ช่วยให้หน้าดูแน่นขึ้นโดยไม่ต้องใส่ข้อความเยอะเกิน</p>
+        <h2>อะไรอีกนิดที่ทำให้เว็บดูมีชีวิต</h2>
+        <p>ไม่ต้องเยอะ แต่อยากให้มันกดแล้วรู้สึกว่าเว็บไม่แบน</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -531,81 +559,156 @@ st.markdown(
 
 g1, g2, g3, g4 = st.columns(4)
 blocks = [
-    ("✨", "วันนี้", "วันของเธอ"),
-    ("🎁", "เว็บนี้", "ตั้งใจทำจริง"),
-    ("💌", "ข้อความ", "สั้นแต่ตรง"),
-    ("🫶", "ฟีล", "อบอุ่นพอดี"),
+    ("💗", "วันนี้", "เป็นวันของเธอ"),
+    ("🎂", "เค้ก", "เปลี่ยนเทียนได้"),
+    ("🫶", "ความรู้สึก", "สุ่มได้เรื่อย ๆ"),
+    ("✨", "จังหวะ", "มีประกายให้กด"),
 ]
 for col, (a, b, c) in zip([g1, g2, g3, g4], blocks):
     with col:
         st.markdown(
             f"""
-            <div class="mini">
-                <div class="k">{a} {b}</div>
-                <div class="v">{c}</div>
+            <div class="glass" style="min-height:128px;">
+                <div class="gtitle">{a} {b}</div>
+                <div class="gbody">{c}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-# ---------- INTERACTION ----------
+# -------------------- MEMORIES --------------------
 st.markdown(
     """
     <div class="panel">
-        <h2>เล่นสักหน่อย</h2>
-        <p>มีปุ่มให้เปิดของขวัญและเปลี่ยนโหมดจบ</p>
+        <h2>ความทรงจำสั้น ๆ</h2>
+        <p>กดสุ่มแล้วมันจะเปลี่ยนเป็นประโยคใหม่</p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-c1, c2 = st.columns(2)
-with c1:
-    if st.button("เปิดของขวัญ 🎀"):
-        st.session_state.gift_open = True
-        st.snow()
+m1, m2 = st.columns([1, 1])
+with m1:
+    if st.button("สุ่มความทรงจำ"):
+        st.session_state.memory_index = random.randint(0, len(memories) - 1)
 
-with c2:
-    if st.button("เปิดประกาย ✨"):
-        st.session_state.gift_open = True
-        st.balloons()
-
-if st.session_state.gift_open:
+with m2:
     st.markdown(
-        """
-        <div class="final center">
-            <h3>ของขวัญวันเกิดของเธอ</h3>
-            <p>
-                ขอให้วันนี้มีแต่เรื่องดี ๆ และหวังว่าเว็บนี้จะทำให้เธอรู้สึกว่า
-                มันเป็นของขวัญที่ตั้งใจทำจริง ไม่ใช่หน้าเว็บธรรมดา
-            </p>
+        f"""
+        <div class="final" style="text-align:left;">
+            <h3>{memories[st.session_state.memory_index]}</h3>
+            <p>{tiny_notes[st.session_state.memory_index % len(tiny_notes)]}</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-# ---------- SECRET NOTE ----------
+# -------------------- MOOD GAME --------------------
 st.markdown(
     """
     <div class="panel">
-        <h2>ข้อความลับ</h2>
-        <p>กดเปิดเมื่อพร้อม</p>
+        <h2>เล่นอีกนิด</h2>
+        <p>ตรงนี้เอาไว้เช็กว่าเว็บวันนี้ควรน่ารักแค่ไหน</p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-st.checkbox("เปิดข้อความลับ", key="secret_open")
-if st.session_state.secret_open:
+st.session_state.mood_value = st.slider("ระดับความน่ารักของวันนี้", 0, 100, st.session_state.mood_value)
+st.progress(st.session_state.mood_value / 100)
+
+if st.session_state.mood_value < 30:
+    mood_reply = "ยังนุ่มอยู่ แต่เริ่มมีฟีลแล้ว"
+elif st.session_state.mood_value < 70:
+    mood_reply = "เริ่มพอดี กำลังน่ารักเลย"
+else:
+    mood_reply = "โอเค ตอนนี้เป็นวันพิเศษแบบชัดเจน"
+
+st.markdown(
+    f"""
+    <div class="story">
+        <div class="t">ผลลัพธ์</div>
+        <div class="d">{mood_reply}</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# -------------------- SECRET MESSAGE --------------------
+st.markdown(
+    """
+    <div class="panel">
+        <h2>ข้อความเก็บไว้</h2>
+        <p>เปิดเมื่อพร้อม</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.checkbox("เปิดข้อความเก็บไว้", key="secret_toggle")
+if st.session_state.secret_toggle:
     st.markdown(
-        """
+        f"""
         <div class="final">
-            <h3>สุขสันต์วันเกิดนะเธอ 💖</h3>
+            <h3>สุขสันต์วันเกิดนะ {nickname} 💖</h3>
             <p>
-                ถึงจะเรียกครีมบ้าง แต่ส่วนใหญ่ก็ยังชอบเรียกเธออยู่ดี
-                เว็บนี้ตั้งใจให้มีสี มีจังหวะ มีลูกเล่น และเป็นของขวัญที่ดูพิเศษจริง ๆ
+                ขอให้วันนี้มีแต่เรื่องดี ๆ แบบที่ไม่ต้องพยายามหาเอง<br>
+                ขอให้ยิ้มได้เยอะ ๆ กินของอร่อยได้เต็มที่<br>
+                และขอให้ปีนี้ใจดีกับเธอมากกว่าที่ผ่านมา
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+msg = st.text_area(
+    "ข้อความถึงเธอ",
+    value="สุขสันต์วันเกิดนะเธอ ขอให้วันนี้เป็นวันที่ดีมาก ๆ แล้วก็มีแต่เรื่องที่ชอบ",
+    height=110,
+)
+
+st.download_button(
+    "ดาวน์โหลดข้อความนี้",
+    data=msg,
+    file_name="birthday_message.txt",
+    mime="text/plain",
+    use_container_width=True,
+)
+
+# -------------------- REASONS --------------------
+st.markdown(
+    """
+    <div class="panel">
+        <h2>เหตุผลสั้น ๆ ที่อยากบอก</h2>
+        <p>ไม่ต้องยาว แค่ให้รู้ว่าเธอสำคัญ</p>
+        <div class="grid2">
+    """,
+    unsafe_allow_html=True,
+)
+
+for r in reasons:
+    st.markdown(
+        f"""
+        <div class="story">
+            <div class="t">• {r}</div>
+            <div class="d">แค่นี้ก็พอแล้วสำหรับความรู้สึกดี ๆ</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+st.markdown("</div></div>", unsafe_allow_html=True)
+
+# -------------------- FINAL --------------------
+st.markdown(
+    """
+    <div class="final">
+        <h3>สุขสันต์วันเกิดนะเธอ 🎂</h3>
+        <p>
+            ขอให้วันนี้ดีแบบที่เธอไม่ต้องฝืนยิ้ม<br>
+            ขอให้มีความสุขเยอะ ๆ แล้วก็จำได้ว่าตัวเองมีค่ามากแค่ไหน
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
