@@ -1,66 +1,96 @@
 import streamlit as st
 import time
-from datetime import datetime
 
 st.set_page_config(page_title="For You ❤️", layout="centered")
+
+# ---------- STATE ----------
+if "step" not in st.session_state:
+    st.session_state.step = 0
 
 # ---------- CSS ----------
 st.markdown("""
 <style>
-body {background: linear-gradient(#ffd6e0, white);}
-.center {text-align:center;}
-.big {font-size:30px; font-weight:bold;}
+body {
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+}
+.box {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    text-align: center;
+}
+.big {font-size:28px; font-weight:bold;}
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- START ----------
-st.markdown("<h1 class='center'>อย่าพึ่งรีบอ่านนะ 👀</h1>", unsafe_allow_html=True)
+# ---------- PROGRESS ----------
+progress = st.session_state.step / 5
+st.progress(progress)
 
-if st.button("กดเริ่ม"):
+st.markdown("<div class='box'>", unsafe_allow_html=True)
+
+# ---------- STEP 0 ----------
+if st.session_state.step == 0:
+    st.markdown("<div class='big'>อยากให้เธอลองเล่นอะไรหน่อย 👀</div>", unsafe_allow_html=True)
+    if st.button("เริ่ม"):
+        st.session_state.step = 1
+        st.rerun()
+
+# ---------- STEP 1 ----------
+elif st.session_state.step == 1:
+    st.markdown("<div class='big'>คิดว่าเราจะพูดอะไร?</div>", unsafe_allow_html=True)
+    st.radio("", ["บอกรัก", "ง้อ", "บ่น", "ไม่รู้"])
     
-    st.markdown("<h2 class='center'>โอเค งั้นเริ่มจริงๆละ</h2>", unsafe_allow_html=True)
-    time.sleep(1)
+    if st.button("ต่อ"):
+        st.session_state.step = 2
+        st.rerun()
 
-    # ---------- STEP 1 ----------
-    choice = st.radio(
-        "คิดว่าเราจะพูดอะไร?",
-        ["บอกรัก", "บ่น", "ง้อ", "ไม่รู้เหมือนกัน"]
-    )
+# ---------- STEP 2 ----------
+elif st.session_state.step == 2:
+    placeholder = st.empty()
+    text = "จริงๆแล้ว..."
+    
+    typed = ""
+    for c in text:
+        typed += c
+        placeholder.markdown(f"<div class='big'>{typed}</div>", unsafe_allow_html=True)
+        time.sleep(0.05)
 
-    if choice:
-        st.write("ฮ่าๆ เดี๋ยวรู้ 😉")
-
-    # ---------- STEP 2 ----------
     if st.button("ต่อไป"):
-        st.markdown("<div class='center'>จริงๆแล้ว...</div>", unsafe_allow_html=True)
-        time.sleep(1)
+        st.session_state.step = 3
+        st.rerun()
 
-        # ---------- TYPING ----------
-        msg = "เราตั้งใจทำสิ่งนี้ให้เธอจริงๆนะ"
-        placeholder = st.empty()
-        typed = ""
-        for c in msg:
-            typed += c
-            placeholder.markdown(f"<div class='big'>{typed}</div>", unsafe_allow_html=True)
-            time.sleep(0.05)
+# ---------- STEP 3 ----------
+elif st.session_state.step == 3:
+    st.markdown("<div class='big'>805 วันที่ผ่านมา...</div>", unsafe_allow_html=True)
+    st.write("มันมีทั้งดีและไม่ดี แต่สุดท้ายเราก็ยังอยู่ตรงนี้")
 
-        # ---------- NEXT ----------
-        if st.button("ยังไม่หมดนะ กดต่อ"):
-            st.write("คิดว่า 805 วันที่ผ่านมาเป็นยังไงบ้าง?")
+    if st.button("ต่อ"):
+        st.session_state.step = 4
+        st.rerun()
 
-            mood = st.selectbox(
-                "เลือกความรู้สึก",
-                ["ดีมาก", "งงๆ", "มีทั้งดีและไม่ดี", "อยากฆ่าเธอ (ล้อเล่น)"]
-            )
+# ---------- STEP 4 ----------
+elif st.session_state.step == 4:
+    st.markdown("<div class='big'>มีอะไรอยากบอก</div>", unsafe_allow_html=True)
 
-            if mood:
-                st.write("เราเองก็คิดเหมือนกัน")
+    msg = "เราไม่ได้ดีที่สุด แต่เราจะพยายามเพื่อเธอ"
+    placeholder = st.empty()
+    typed = ""
 
-            # ---------- FINAL ----------
-            if st.button("โอเค มาถึงตรงนี้ละ"):
-                st.balloons()
-                st.markdown(f"<h2 class='center'>สุขสันต์วันเกิดนะ ❤️</h2>", unsafe_allow_html=True)
-                st.write("ขอบคุณที่อยู่ด้วยกันมานะ")
+    for c in msg:
+        typed += c
+        placeholder.markdown(f"<div class='big'>{typed}</div>", unsafe_allow_html=True)
+        time.sleep(0.04)
 
-                if st.button("กดสุดท้าย"):
-                    st.success("อยู่กับเรานานๆนะ เราไม่ได้อยากเสียเธอไปเลยจริงๆ")
+    if st.button("สุดท้ายแล้ว"):
+        st.session_state.step = 5
+        st.rerun()
+
+# ---------- FINAL ----------
+elif st.session_state.step == 5:
+    st.balloons()
+    st.markdown("<div class='big'>สุขสันต์วันเกิดนะ ❤️</div>", unsafe_allow_html=True)
+    st.success("อยู่กับเรานานๆนะ")
+
+st.markdown("</div>", unsafe_allow_html=True)
